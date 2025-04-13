@@ -26,7 +26,7 @@ export const clearGallery = () => {
   smoothScroll();
 };
 
-export function renderImages(images) {
+export function createGallery(images) {
   const gallery = document.querySelector('.gallery');
 
   gallery.insertAdjacentHTML(
@@ -84,14 +84,14 @@ export function smoothScroll() {
   }
 }
 
-export function showloadMore() {
+export function showLoadMore() {
   const loadMore = document.querySelector('.load-more');
   if (loadMore) {
     loadMore.style.display = 'flex';
   }
 }
 
-export function hideloadMore() {
+export function hideLoadMore() {
   const loadMore = document.querySelector('.load-more');
   if (loadMore) {
     loadMore.style.display = 'none';

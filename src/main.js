@@ -1,14 +1,14 @@
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
-import { fetchImages } from './js/pixabay-api.js';
+import { getImagesByQuery } from './js/pixabay-api.js';
 import {
   showLoader,
   hideLoader,
   clearGallery,
-  renderImages,
+  createGallery,
   initializeLightbox,
-  showloadMore,
-  hideloadMore,
+  showLoadMore,
+  hideLoadMore,
   smoothScroll,
 } from './js/render-functions.js';
 
@@ -16,19 +16,17 @@ const form = document.querySelector('.form');
 const loadMoreButton = document.querySelector('.load-more');
 
 let currentPage = 1;
-let currentSearchText = '';
+let currentQuery = '';
 let totalHits = 0;
 
 hideLoader();
-hideloadMore();
+hideLoadMore();
 
 form.addEventListener('submit', async function (event) {
   event.preventDefault();
-  const searchText = form
-    .querySelector('input[name="search-text"]')
-    .value.trim();
+  const query = form.querySelector('input[name="search-text"]').value.trim();
 
-  if (!searchText) {
+  if (!query) {
     iziToast.error({
       title: 'Error',
       message: 'Please, enter the text for search!',
@@ -36,17 +34,17 @@ form.addEventListener('submit', async function (event) {
     return;
   }
 
-  if (searchText !== currentSearchText) {
+  if (query !== currentQuery) {
     currentPage = 1;
     clearGallery();
     smoothScroll();
-    currentSearchText = searchText;
+    currentQuery = query;
   }
 
   showLoader();
 
   try {
-    const response = await fetchImages(currentSearchText, currentPage);
+    const response = await getImagesByQuery(currentQuery, currentPage);
     hideLoader();
 
     if (!response || !response.hits || response.hits.length === 0) {
@@ -55,21 +53,21 @@ form.addEventListener('submit', async function (event) {
         message:
           'Sorry, there are no images matching your search query. Please try again!',
       });
-      hideloadMore();
+      hideLoadMore();
       return;
     }
 
     const images = response.hits;
     totalHits = response.totalHits;
 
-    renderImages(images);
+    createGallery(images);
     initializeLightbox();
 
     const totalPages = Math.ceil(totalHits / 15);
     if (currentPage >= totalPages) {
-      hideloadMore();
+      hideLoadMore();
     } else {
-      showloadMore();
+      showLoadMore();
     }
   } catch (error) {
     hideLoader();
@@ -87,7 +85,7 @@ if (loadMoreButton) {
     showLoader();
 
     try {
-      const response = await fetchImages(currentSearchText, currentPage);
+      const response = await getImagesByQuery(currentQuery, currentPage);
       hideLoader();
 
       if (!response || !response.hits || response.hits.length === 0) {
@@ -95,19 +93,19 @@ if (loadMoreButton) {
           title: 'Caution',
           message: 'Sorry, no more images available.',
         });
-        hideloadMore();
+        hideLoadMore();
         return;
       }
 
-      renderImages(response.hits);
+      createGallery(response.hits);
       initializeLightbox();
       smoothScroll();
 
       const totalPages = Math.ceil(totalHits / 15);
       if (currentPage >= totalPages) {
-        hideloadMore();
+        hideLoadMore();
       } else {
-        showloadMore();
+        showLoadMore();
       }
     } catch (error) {
       hideLoader();
